@@ -28,8 +28,14 @@ def run_llm(query: str) -> str:
     # Invoke the chain with the query. The input is required by the retrieval_qa_chat_prompt
     result = qa.invoke({"input": query})
 
-    return result
+    new_result = {
+        "query": result["input"],
+        "result": result["answer"],
+        "source_documents": result["context"]
+    }
+
+    return new_result
 
 if __name__ == "__main__":
     res = run_llm(query="What is a Langchain Chain?")
-    print(res["answer"])
+    print(res["result"])
