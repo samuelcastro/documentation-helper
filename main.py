@@ -25,7 +25,7 @@ def create_sources_string(source_urls: Set[str]) -> str:
 
 if prompt:
     with st.spinner("Generating response..."):
-        generated_response = run_llm(query=prompt)
+        generated_response = run_llm(query=prompt, chat_history=st.session_state["chat_history"])
         # Using a list comprehension, we get the unique sources from the source documents.
         # Using a set to avoid duplicates.
         sources = set([doc.metadata["source"] for doc in generated_response["source_documents"]])
@@ -36,6 +36,8 @@ if prompt:
 
         st.session_state["user_prompt_history"].append(prompt)
         st.session_state["chat_answers_history"].append(formatted_response)
+        st.session_state["chat_history"].append(("human", prompt))
+        st.session_state["chat_history"].append(("ai", generated_response["result"]))
 
 if st.session_state["user_prompt_history"]:
     for response, query in zip(st.session_state["chat_answers_history"], st.session_state["user_prompt_history"]):

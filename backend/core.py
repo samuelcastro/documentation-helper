@@ -1,5 +1,7 @@
 from dotenv import load_dotenv
+from typing import List, Dict, Any
 from langchain.chains.retrieval import create_retrieval_chain
+from langchain.chains.history_aware_retriever import create_history_aware_retriever
 
 load_dotenv()
 
@@ -10,10 +12,10 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 INDEX_NAME = "langchain-doc-index"
 
-def run_llm(query: str) -> str:
+def run_llm(query: str, chat_history: List[Dict[str, Any]]) -> str:
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
     # Create Pinecone vector store to perform the similarity search
-    dosearch = PineconeVectorStore(index_name=INDEX_NAME, embedding=embeddings)
+    docsearch = PineconeVectorStore(index_name=INDEX_NAME, embedding=embeddings)
     chat = ChatOpenAI(verbose=True, temperature=0)
 
     # Create the retrieval chain. It takes the query, then searches for the most similar chunks of text in the vector store,
@@ -22,11 +24,20 @@ def run_llm(query: str) -> str:
     # This is the augmentation process where it uses put the things together to send to the LLM.
     stuff_documents_chain = create_stuff_documents_chain(chat, retrieval_qa_chat_prompt)
 
+    # This prompt will help with chat memory, to let LLM understand the context of the user's previous interactions.
+    rephrase_prompt = hub.pull("langchain-ai/chat-langchain-rephrase")
+
+    # This will create a retriever that will return relevant documents based on the chat history.
+    # If there is no chat history, then the original question will be sent.
+    history_aware_retriever = create_history_aware_retriever(
+        llm=chat, retriever=docsearch.as_retriever(), prompt=rephrase_prompt
+    )
+
     # Get the most relevant chunks from the vector store and put them together with the query.
-    qa = create_retrieval_chain(retriever=dosearch.as_retriever(), combine_docs_chain=stuff_documents_chain)
+    qa = create_retrieval_chain(retriever=history_aware_retriever, combine_docs_chain=stuff_documents_chain)
 
     # Invoke the chain with the query. The input is required by the retrieval_qa_chat_prompt
-    result = qa.invoke({"input": query})
+    result = qa.invoke({"input": query, "chat_history": chat_history})
 
     new_result = {
         "query": result["input"],

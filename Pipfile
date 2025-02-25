@@ -6,7 +6,6 @@ name = "pypi"
 [packages]
 langchain = "*"
 beautifulsoup4 = "*"
-black = "*"
 tiktoken = "*"
 openai = "*"
 pinecone-client = "*"
@@ -22,6 +21,7 @@ langchain-openai = "*"
 python-dotenv = "*"
 langchain-community = "*"
 streamlit = "*"
+black = "*"
 
 [dev-packages]
 
