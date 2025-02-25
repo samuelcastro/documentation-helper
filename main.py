@@ -6,11 +6,10 @@ st.header("Langchain Documentation Chatbot")
 
 prompt = st.text_input("Prompt", placeholder="Hey, how can I help you today?")
 
-if "user_prompt_history" not in st.session_state:
-    st.session_state["user_prompt_history"] = []
-
-if "chat_answers_history" not in st.session_state:
+if ("chat_answers_history" not in st.session_state and "user_prompt_history" not in st.session_state and "chat_history" not in st.session_state):
     st.session_state["chat_answers_history"] = []
+    st.session_state["user_prompt_history"] = []
+    st.session_state["chat_history"] = []
 
 def create_sources_string(source_urls: Set[str]) -> str:
     if not source_urls:
