@@ -16,7 +16,7 @@ def run_llm(query: str, chat_history: List[Dict[str, Any]]) -> str:
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
     # Create Pinecone vector store to perform the similarity search
     docsearch = PineconeVectorStore(index_name=INDEX_NAME, embedding=embeddings)
-    chat = ChatOpenAI(verbose=True, temperature=0)
+    chat = ChatOpenAI(model="gpt-3.5-turbo", verbose=True, temperature=0)
 
     # Create the retrieval chain. It takes the query, then searches for the most similar chunks of text in the vector store,
     # and then passes the query and the most similar chunks to the chat model.
