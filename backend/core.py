@@ -12,6 +12,7 @@ from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 
 INDEX_NAME = "langchain-doc-index"
 
+
 def run_llm(query: str, chat_history: List[Dict[str, Any]]) -> str:
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
     # Create Pinecone vector store to perform the similarity search
@@ -34,7 +35,9 @@ def run_llm(query: str, chat_history: List[Dict[str, Any]]) -> str:
     )
 
     # Get the most relevant chunks from the vector store and put them together with the query.
-    qa = create_retrieval_chain(retriever=history_aware_retriever, combine_docs_chain=stuff_documents_chain)
+    qa = create_retrieval_chain(
+        retriever=history_aware_retriever, combine_docs_chain=stuff_documents_chain
+    )
 
     # Invoke the chain with the query. The input is required by the retrieval_qa_chat_prompt
     result = qa.invoke({"input": query, "chat_history": chat_history})
@@ -42,10 +45,11 @@ def run_llm(query: str, chat_history: List[Dict[str, Any]]) -> str:
     new_result = {
         "query": result["input"],
         "result": result["answer"],
-        "source_documents": result["context"]
+        "source_documents": result["context"],
     }
 
     return new_result
+
 
 if __name__ == "__main__":
     res = run_llm(query="What is a Langchain Chain?")
